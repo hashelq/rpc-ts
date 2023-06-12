@@ -93,7 +93,7 @@ export default class Server {
         const callback = this.callbacks.get(response.index);
 
         if (callback === undefined)
-            throw new Error('No callback found');
+            return;
 
         if (response.errorRPC !== undefined)
             callback.reject(new RPCError(response.errorRPC));
