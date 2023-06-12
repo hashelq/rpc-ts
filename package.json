@@ -1,0 +1,23 @@
+{
+  "name": "ts-rf",
+  "description": "TypeScript Remote-procedure-call Framework",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "build": "tsc --esModuleInterop",
+    "test": "tsc --esModuleInterop && mocha ./dist/tests.js"
+  },
+  "dependencies": {
+    "isomorphic-ws": "^5.0.0",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.5",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0"
+  }
+}
