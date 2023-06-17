@@ -2,7 +2,7 @@
 An experimental library that implements a bidirectional Method+Event protocol for your homogenous Typescript code.
 
 Here is a short example how it works:
-```
+```typescript
 // { server, client }
 
 // Define a Method and an Event
@@ -19,7 +19,7 @@ new NewUser("Hashelq").with(client)
 ```
 
 What is interesting, that everything you have just seen can also be send backwards!
-```
+```typescript
 client.onMethod(new FindUser, name => { name: "???", age: -1 });
 client.onEvent(new NewUser, name => console.log(`New user: ${name}`));
 
@@ -30,7 +30,7 @@ new NewUser("HashElq").withs(client, server.clients[0]);
 ### Sessions
 Someday we find out that indexing big tables every single method request is not a good idea...
 
-```
+```typescript
 interface Session {
   lastMessage: string
 };
@@ -41,3 +41,8 @@ server.onEvent(..., (message: string, { _socket, session } => {
   session.lastMessage = message;
 }))
 ```
+
+### Links to understand how to deal with it
+* [Runtime type system for IO decoding/encoding ](https://gcanti.github.io/io-ts/)
+* [io-ts github page](https://github.com/gcanti/io-ts/)
+* [test.ts](https://github.com/hashelq/rpc-ts/blob/master/src/tests.ts)
