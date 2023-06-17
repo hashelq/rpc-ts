@@ -67,6 +67,13 @@ class Event<Data> {
         this.data = data;
     }
 
+    static new<A, B>(name: string, Data: t.Type<A, B>) {
+        return class extends Event<t.TypeOf<typeof Data>> {
+            name = name;
+            rtData = Data;
+        };
+    }
+
     async with(client: Client) {
         return await client.sendEvent(this);
     }
