@@ -33,6 +33,14 @@ class Method<Request, Response> {
         this.request = request;
     }
 
+    static new<A, B, C, D>(name: string, Req: t.Type<A, B>, Res: t.Type<C, D>) {
+        return class extends Method<t.TypeOf<typeof Req>, t.TypeOf<typeof Res>> {
+            name = name;
+            rtRequest = Req;
+            rtResponse = Res;
+        };
+    }
+
     async with(client: Client): Promise<Response> {
         return await client.call(this) as Response;
     }
@@ -43,8 +51,8 @@ class Method<Request, Response> {
 }
 
 const EventData__RT = t.type({
-  data: t.any,
-  name: t.string
+    data: t.any,
+    name: t.string
 });
 
 type EventData = t.TypeOf<typeof EventData__RT>;
@@ -69,17 +77,17 @@ class Event<Data> {
 }
 
 const RequestData__RT = t.type({
-  index: t.number,
-  name: t.string,
-  payload: t.any
+    index: t.number,
+    name: t.string,
+    payload: t.any
 });
 
 type RequestData = t.TypeOf<typeof RequestData__RT>;
 
 const ResponseData__RT = t.type({
-  index: t.number,
-  payload: t.any,
-  errorRPC: t.union([ t.string, t.undefined ])
+    index: t.number,
+    payload: t.any,
+    errorRPC: t.union([t.string, t.undefined])
 });
 
 type ResponseData = t.TypeOf<typeof ResponseData__RT>;
@@ -100,8 +108,8 @@ enum MessageType {
 }
 
 const Message__RT = t.type({
-  type: t.number,
-  content: t.any
+    type: t.number,
+    content: t.any
 });
 
 type Message = t.TypeOf<typeof Message__RT>;
