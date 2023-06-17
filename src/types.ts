@@ -1,15 +1,31 @@
+import * as t from 'io-ts';
 import Client from './client';
 import Server from './server';
 
 interface Callback<Error> {
+    rtResponse: t.Type<unknown, unknown>;
+
     resolve: (result: any) => void;
     reject: (error: Error) => void;
     startedAt: Date;
 };
 
+interface RTMethodHandler<T> {
+    rtRequest: t.Type<unknown, unknown>;
+    fn: T;
+}
+
+interface RTEventHandler<T> {
+    rtData: t.Type<unknown, unknown>;
+    fn: T;
+}
+
 class Method<Request, Response> {
     request: Request;
+    rtRequest: t.Type<unknown, unknown>;
+
     response?: Response;
+    rtResponse: t.Type<unknown, unknown>;
     name: string;
 
     // If nothing, then the instance is gonna be a signature instead!
@@ -21,13 +37,22 @@ class Method<Request, Response> {
         return await client.call(this) as Response;
     }
 
-    async withs(server: Server, client: WebSocket): Promise<Response> {
+    async withs(server: Server<any>, client: WebSocket): Promise<Response> {
         return await server.call(client, this) as Response;
     }
 }
 
+const EventData__RT = t.type({
+  data: t.any,
+  name: t.string
+});
+
+type EventData = t.TypeOf<typeof EventData__RT>;
+
 class Event<Data> {
     data: Data;
+    rtData: t.Type<unknown, unknown>;
+
     name: string;
 
     constructor(data?: Data) {
@@ -38,42 +63,26 @@ class Event<Data> {
         return await client.sendEvent(this);
     }
 
-    async withs(server: Server, ws: WebSocket) {
-        return await server.sendEvent(ws, this);
+    withs(server: Server<any>, ws: WebSocket) {
+        return server.sendEvent(ws, this);
     }
 }
 
-class RequestData {
-    index: number;
-    name: string;
-    payload: object;
+const RequestData__RT = t.type({
+  index: t.number,
+  name: t.string,
+  payload: t.any
+});
 
-    json() {
-        return JSON.stringify(this);
-    }
+type RequestData = t.TypeOf<typeof RequestData__RT>;
 
-    static from_object(data: { index: number, name: string, payload: object }) {
-        const self = new RequestData;
-        self.index = data.index;
-        self.name = data.name;
-        self.payload = data.payload;
-        return self;
-    }
+const ResponseData__RT = t.type({
+  index: t.number,
+  payload: t.any,
+  errorRPC: t.union([ t.string, t.undefined ])
+});
 
-    static from_method<O extends Method<any, any>>(object: O, index: number): RequestData {
-        let d = new RequestData;
-        d.index = index;
-        d.name = object.name;
-        d.payload = object.request;
-        return d;
-    };
-}
-
-interface ResponseData {
-    index: number;
-    payload?: object;
-    errorRPC?: string;
-}
+type ResponseData = t.TypeOf<typeof ResponseData__RT>;
 
 class RPCError extends Error {
     public error: string;
@@ -84,26 +93,17 @@ class RPCError extends Error {
     }
 }
 
-enum ClientMessageType {
+enum MessageType {
     Method,
     Response,
     Event
 }
 
-enum ServerMessageType {
-    Method,
-    Response,
-    Event
-}
+const Message__RT = t.type({
+  type: t.number,
+  content: t.any
+});
 
-interface ClientMessage {
-    type: ClientMessageType;
-    content: object
-}
+type Message = t.TypeOf<typeof Message__RT>;
 
-interface ServerMessage {
-    type: ServerMessageType;
-    content: object
-}
-
-export { Callback, Event, Method, ClientMessage, ClientMessageType, ServerMessage, ServerMessageType, RPCError, RequestData, ResponseData };
+export { RTEventHandler, RTMethodHandler, Callback, EventData__RT, EventData, Event, Method, Message__RT, Message, MessageType, RPCError, RequestData__RT, RequestData, ResponseData__RT, ResponseData };
