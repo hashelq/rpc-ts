@@ -22,7 +22,7 @@ async function getBoth(): Promise<{ client: Client, server: Server }> {
     return { server, client };
 }
 
-describe('server and client', async () => {
+describe('server and client', () => {
     it('should create server/client and check method "Hello"', async () => {
         const { server, client } = await getBoth();
         class Hello extends Method<string, string> { name = 'Hello'; rtRequest = t.string; rtResponse = t.string; };
