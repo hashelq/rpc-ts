@@ -1,5 +1,5 @@
 {
-  "name": "ts-rf",
+  "name": "rpc-ts",
   "description": "TypeScript Remote-procedure-call Framework",
   "version": "1.0.0",
   "main": "dist/index.js",
