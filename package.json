@@ -12,6 +12,8 @@
     "test": "tsc --esModuleInterop && mocha ./dist/tests.js"
   },
   "dependencies": {
+    "fp-ts": "^2.16.0",
+    "io-ts": "^2.2.20",
     "isomorphic-ws": "^5.0.0",
     "ws": "^8.13.0"
   },

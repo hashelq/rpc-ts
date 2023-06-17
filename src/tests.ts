@@ -1,10 +1,11 @@
 import { expect } from 'chai';
 import { Client, Method, Server } from './index';
+import * as t from "io-ts";
 
 const PORT_FOR_TESTING = 60123;
 
 function createServer(): Server {
-    return new Server({ port: PORT_FOR_TESTING });
+    return new Server({ port: PORT_FOR_TESTING, sessionInitializer: () => {} });
 }
 
 async function createClient(): Promise<Client> {
@@ -25,9 +26,9 @@ describe('server and client', () => {
     it('should create server/client and check method "Hello"', async () => {
         const { server, client } = await getBoth();
 
-        class Hello extends Method<string, string> { name = 'Hello' };
+        class Hello extends Method<string, string> { name = 'Hello'; rtRequest = t.string; rtResponse = t.string; };
 
-        server.onMethod(new Hello, (_x, _y, name) => `Hello, ${name} from the server!`);
+        server.onMethod(new Hello, (name) => `Hello, ${name} from the server!`);
         client.onMethod(new Hello, (name) => `Hello, ${name} from a client!`);
 
         const NAME = 'UNIVERSE';
