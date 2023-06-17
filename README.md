@@ -29,10 +29,12 @@ new NewUser("HashElq").withs(client, server.clients[0]);
 
 ### How it works
 The RPC protocol works on top of the `Websockets`.
+
 A human readable js-like JSON data is transmittied between the server and client sides.
 
 ### Compatibility
 To run a server, you need to have an appropriate nodejs-like runtime.
+
 The client side can work in a modern browser (thanks isomorphic-ws) and a nodejs-like runtime.
 
 ### Sessions
