@@ -72,6 +72,10 @@ export default class Client extends Side<{ socket: WebSocket }> {
     public call<Req, Resp, M extends Method<Req, Resp>>(method: M) {
         return this._call(this.ws, method);
     };
+
+    public close() {
+      return this.ws.close();
+    }
 }
 
 export {

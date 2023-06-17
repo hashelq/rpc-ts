@@ -70,5 +70,9 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
         Array.from(this.clients).map(
             ([_, x]) => event.withs(this, x)
         );
-    } 
+    }
+
+    public close() {
+      return this.wss.close();
+    }
 };
