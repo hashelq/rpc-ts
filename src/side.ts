@@ -60,6 +60,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
             type: MessageType.Response,
             content: response
         };
+        
         source.socket.send(JSON.stringify(toSend));
     }
 
@@ -77,7 +78,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
             const decoded = rtResponse.decode(response.payload);
 
             if (isLeft(decoded))
-                return;
+                return this.handleProtocolError("Response body malformed.");
 
             resolve(decoded.right);
         }
