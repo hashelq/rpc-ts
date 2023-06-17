@@ -18,7 +18,7 @@ const { name, age } = await (new FindUser("Alice").with(client));
 new NewUser("Hashelq").with(client)
 ```
 
-What is interesting, that everything you have just seen can also be send backwards!
+What is interesting, that everything you have just seen can also be sent backwards!
 ```typescript
 client.onMethod(new FindUser, name => { name: "???", age: -1 });
 client.onEvent(new NewUser, name => console.log(`New user: ${name}`));
@@ -36,8 +36,6 @@ To run a server, you need to have an appropriate nodejs-like runtime.
 The client side can work in a modern browser (thanks isomorphic-ws) and a nodejs-like runtime.
 
 ### Sessions
-Someday we find out that indexing big tables every single method request is not a good idea...
-
 ```typescript
 interface Session {
   lastMessage: string
