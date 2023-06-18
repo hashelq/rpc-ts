@@ -1,11 +1,12 @@
 {
   "name": "rpc-with-types",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+github.com/hashelq/rpc-ts/"
+    "url": "https://github.com/hashelq/rpc-ts.git"
   },
   "description": "TypeScript Remote-procedure-call Framework",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "keywords": ["rpc", "typescript", "websockets", "ws", "framework"],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
