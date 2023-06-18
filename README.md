@@ -1,4 +1,4 @@
-# rpc-ts
+# rpc-with-types
 An experimental library that implements a bidirectional Method+Event protocol for your homogenous Typescript code.
 
 Here is a short example how it works:
@@ -7,7 +7,7 @@ Here is a short example how it works:
 
 // Define a Method and an Event
 const FindUser = Method.new("GetUser", t.string, t.type({ name: t.string, age: t.number }));
-const NewUser = NewUser.new("NewUser", t.string);
+const NewUser = Event.new("NewUser", t.string);
 
 // Implement a Method on a Server
 server.onMethod(new FindUser, name => { name: "Alice", age: 80000 });
