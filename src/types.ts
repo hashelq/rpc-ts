@@ -33,7 +33,7 @@ class Method<Request, Response> {
         this.request = request;
     }
 
-    static new<A, B, C, D>(name: string, Req: t.Type<A, B>, Res: t.Type<C, D>) {
+    static new<A, B>(name: string, Req: t.Type<A>, Res: t.Type<B>) {
         return class extends Method<t.TypeOf<typeof Req>, t.TypeOf<typeof Res>> {
             name = name;
             rtRequest = Req;
