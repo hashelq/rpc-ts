@@ -7,7 +7,7 @@ function jsonOrNull(data: string): any | null {
 }
 
 export default abstract class Side<CS extends { socket: WebSocket }> {
-    protected methodHandlers: Map<string, RTMethodHandler<(data: any, source: CS) => unknown>> = new Map();
+    protected methodHandlers: Map<string, RTMethodHandler<(data: any, source: CS) => Promise<unknown>>> = new Map();
     protected eventHandlers: Map<string, RTEventHandler<(data: any, source: CS) => void>> = new Map();
     protected callbacks: Map<number, Callback<Error | RPCError>> = new Map();
     protected methodIndex = 0;
@@ -28,7 +28,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
       throw new Error(message);
     }
 
-    protected onMessageMethod(request: RequestData, source: CS) {
+    protected async onMessageMethod(request: RequestData, source: CS) {
         const handler = this.methodHandlers.get(request.name);
         let payload = undefined;
         let error = undefined;
@@ -45,7 +45,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
                 const input = dataInput.right;
 
                 try {
-                    payload = fn(input, source);
+                    payload = await fn(input, source);
                 } catch (e: any) {
                     if (e instanceof RPCError)
                         error = e.error;
@@ -179,7 +179,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
         });
     }
 
-    public onMethod<Req, Res>(signature: Method<Req, Res>, fn: (data: Req, source: CS) => Res) {
+    public onMethod<Req, Res>(signature: Method<Req, Res>, fn: (data: Req, source: CS) => Promise<Res>) {
         if (signature.rtRequest === undefined)
             throw new Error("rtRequest of a method cannot be undefined!");
 

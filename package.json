@@ -7,7 +7,13 @@
   },
   "description": "TypeScript Remote-procedure-call Framework",
   "version": "1.0.4",
-  "keywords": ["rpc", "typescript", "websockets", "ws", "framework"],
+  "keywords": [
+    "rpc",
+    "typescript",
+    "websockets",
+    "ws",
+    "framework"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -25,6 +31,7 @@
   },
   "devDependencies": {
     "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
     "chai": "^4.3.7",
     "mocha": "^10.2.0"
   }
