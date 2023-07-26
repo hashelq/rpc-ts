@@ -22,10 +22,10 @@ interface RTEventHandler<T> {
 
 class Method<Request, Response> {
     request: Request;
-    rtRequest: t.Type<unknown, unknown>;
+    rtRequest: t.Type<any, any>;
 
     response?: Response;
-    rtResponse: t.Type<unknown, unknown>;
+    rtResponse: t.Type<any, any>;
     name: string;
 
     // If nothing, then the instance is gonna be a signature instead!
