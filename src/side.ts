@@ -179,7 +179,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
         });
     }
 
-    public onMethod<Req, Res>(signature: Method<Req, Res>, fn: (data: Req, source: CS) => Promise<Res>) {
+    public onMethod<A, B, Req extends A, Res extends B>(signature: Method<A, B>, fn: (data: Req, source: CS) => Promise<Res>) {
         if (signature.rtRequest === undefined)
             throw new Error("rtRequest of a method cannot be undefined!");
 
@@ -193,7 +193,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
         });
     }
 
-    public onEvent<Data, T extends Event<Data>>(signature: T, fn: (data: Data, source: CS) => void) {
+    public onEvent<A, Data extends A>(signature: Event<A>, fn: (data: Data, source: CS) => void) {
         if (signature.rtData === undefined)
             throw new Error("rtData of an event cannot be undefined!");
 
