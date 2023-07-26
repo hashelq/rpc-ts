@@ -67,7 +67,7 @@ class Event<Data> {
         this.data = data;
     }
 
-    static new<A, B>(name: string, Data: t.Type<A, B>) {
+    static new<A>(name: string, Data: t.Type<A>) {
         return class extends Event<t.TypeOf<typeof Data>> {
             name = name;
             rtData = Data;
