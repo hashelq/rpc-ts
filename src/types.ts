@@ -3,7 +3,7 @@ import Client from './client';
 import Server from './server';
 
 interface Callback<Error> {
-    rtResponse: t.Type<unknown, unknown>;
+    rtResponse: t.Type<any, any>;
 
     resolve: (result: any) => void;
     reject: (error: Error) => void;
@@ -11,12 +11,12 @@ interface Callback<Error> {
 };
 
 interface RTMethodHandler<T> {
-    rtRequest: t.Type<unknown, unknown>;
+    rtRequest: t.Type<any, any>;
     fn: T;
 }
 
 interface RTEventHandler<T> {
-    rtData: t.Type<unknown, unknown>;
+    rtData: t.Type<any, any>;
     fn: T;
 }
 
@@ -59,7 +59,7 @@ type EventData = t.TypeOf<typeof EventData__RT>;
 
 class Event<Data> {
     data: Data;
-    rtData: t.Type<unknown, unknown>;
+    rtData: t.Type<any, any>;
 
     name: string;
 
