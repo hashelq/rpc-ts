@@ -27,8 +27,8 @@ describe('server and client', () => {
         const { server, client } = await getBoth();
         class Hello extends Method<string, string> { name = 'Hello'; rtRequest = t.string; rtResponse = t.string; };
 
-        server.onMethod(new Hello, (name) => `Hello, ${name} from the server!`);
-        client.onMethod(new Hello, (name) => `Hello, ${name} from a client!`);
+        server.onMethod(new Hello, async (name) => `Hello, ${name} from the server!`);
+        client.onMethod(new Hello, async (name) => `Hello, ${name} from a client!`);
 
         const NAME = 'UNIVERSE';
         const event = new Hello(NAME);
@@ -75,7 +75,7 @@ describe('server and client', () => {
 
         const FindUser = Method.new("FindUser", t.string, User);
 
-        server.onMethod(new FindUser, username => {
+        server.onMethod(new FindUser, async username => {
           const user = ServerUsers.filter(x => `${x.firstname} ${x.lastname}` === username)[0];
           
           return {
