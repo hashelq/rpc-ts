@@ -32,6 +32,7 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
 
         this.wss.on('connection', (ws: WebSocket) => {
             const clientID = this.clientIndex++;
+            ws.send
 
             const source = { id: clientID, socket: ws, session: this.sessionInitializer(clientID) };
 
