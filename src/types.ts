@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import * as t from "io-ts";
 import Client from './client';
 import Server from './server';
 import WebSocket = require('ws');
