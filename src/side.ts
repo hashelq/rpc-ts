@@ -1,5 +1,5 @@
-import { RTMethodHandler, RTEventHandler, Callback, Message, MessageType, Event, Method, RequestData, ResponseData, RPCError, RequestData__RT, Message__RT, ResponseData__RT, EventData__RT, EventData } from './types';
-import { isLeft } from 'fp-ts/lib/Either';
+import { RTMethodHandler, RTEventHandler, Callback, Message, MessageType, Event, Method, RequestData, ResponseData, RPCError, RequestData__RT, Message__RT, ResponseData__RT, EventData__RT, EventData } from './types.js';
+import { isLeft } from 'fp-ts/lib/Either.js';
 import { WebSocket } from 'ws';
 
 function jsonOrNull(data: string): any | null {

@@ -1,5 +1,6 @@
 {
   "name": "rpc-with-types",
+  "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",

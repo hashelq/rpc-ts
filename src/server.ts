@@ -1,6 +1,6 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import Side from './side';
-import { Event, Method } from './types';
+import Side from './side.js';
+import { Event, Method } from './types.js';
 
 const DEFAULT_TIMEOUT = 60 * 1000;
 
