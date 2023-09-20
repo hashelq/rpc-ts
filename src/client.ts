@@ -1,6 +1,6 @@
 import WebSocket from 'isomorphic-ws';
-import Side from './side';
-import { Method, Event } from './types';
+import Side from './side.js';
+import { Method, Event } from './types.js';
 
 const DEFAULT_TIMEOUT = 60 * 1000;
 

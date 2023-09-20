@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Client, Method, Server } from './index';
+import { Client, Method, Server } from './index.js';
 import * as t from "io-ts";
 
 const PORT_FOR_TESTING = 60123;

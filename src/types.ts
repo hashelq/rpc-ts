@@ -1,6 +1,6 @@
 import * as t from "io-ts";
-import Client from './client';
-import Server from './server';
+import Client from './client.js';
+import Server from './server.js';
 import WebSocket = require('ws');
 
 interface Callback<Error> {

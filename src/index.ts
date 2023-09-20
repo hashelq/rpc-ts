@@ -1,6 +1,6 @@
-import Server from './server';
-import Client from './client';
-export * from './types';
+import Server from './server.js';
+import Client from './client.js';
+export * from './types.js';
 
 export {
     Server,
