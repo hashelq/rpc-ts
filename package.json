@@ -7,7 +7,7 @@
     "url": "https://github.com/hashelq/rpc-ts.git"
   },
   "description": "TypeScript Remote-procedure-call Framework",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "keywords": [
     "rpc",
     "typescript",

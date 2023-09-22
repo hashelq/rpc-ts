@@ -40,16 +40,16 @@ export default class Client extends Side<{ socket: WebSocket }> {
 
                     const ws = new WebSocket(this.endpoint);
 
-                    ws.on('open', () => {
+                    ws.onopen = () => {
                         this.state = ClientState.Connected;
                         this.ws = ws;
 
                         resolve();
-                    });
+                    };
 
-                    ws.on('close', reject);
+                    ws.onclose = reject;
 
-                    ws.on('message', (a: any) => this.onMessage(a, { socket: ws }));
+                    ws.onmessage = (a: any) => this.onMessage(a.data, { socket: ws });
 
                     this.ws = ws;
                     break;
