@@ -9,16 +9,16 @@ Here is a short example how it works:
 const FindUser = Method.new("GetUser", t.string, t.type({ name: t.string, age: t.number }));
 const NewUser = Event.new("NewUser", t.string);
 
-// Implement a Method on a Server
+// Implement a Method on the Server
 server.onMethod(new FindUser, name => { name: "Alice", age: 80000 });
 server.onEvent(new NewUser, name => console.log(`New user: ${name}`));
 
-// Call it from a Client
+// Call it from the Client
 const { name, age } = await (new FindUser("Alice").with(client));
 new NewUser("Hashelq").with(client)
 ```
 
-What is interesting, that everything you have just seen can also be sent backwards!
+What is interesting, that everything you have just seen can also be used backwards!
 ```typescript
 client.onMethod(new FindUser, name => { name: "???", age: -1 });
 client.onEvent(new NewUser, name => console.log(`New user: ${name}`));
@@ -28,9 +28,9 @@ new NewUser("HashElq").withs(client, server.clients[0]);
 ```
 
 ### How it works
-The RPC protocol works on top of the `Websockets`.
+The RPC works on top of the `WebSockets` protocol.
 
-A human readable js-like JSON data is transmittied between the server and client sides.
+A human readable JSON text is sent between the server and client sides.
 
 ### Compatibility
 To run a server, you need to have an appropriate nodejs-like runtime.
