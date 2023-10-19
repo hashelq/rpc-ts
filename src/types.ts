@@ -85,7 +85,7 @@ class Event<Data> {
 }
 
 const RequestData__RT = t.type({
-    index: t.number,
+    index: t.string,
     name: t.string,
     payload: t.any
 });
@@ -93,7 +93,7 @@ const RequestData__RT = t.type({
 type RequestData = t.TypeOf<typeof RequestData__RT>;
 
 const ResponseData__RT = t.type({
-    index: t.number,
+    index: t.string,
     payload: t.any,
     errorRPC: t.union([t.string, t.undefined])
 });

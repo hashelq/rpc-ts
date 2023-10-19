@@ -2,6 +2,20 @@ import { RTMethodHandler, RTEventHandler, Callback, Message, MessageType, Event,
 import { isLeft } from 'fp-ts/lib/Either.js';
 import { WebSocket } from 'ws';
 
+const INDEX_DIFFICULTY: number = 32;
+
+function genIndex(length: number): string {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return `${new Date().getTime()}___${result}`;
+}
+
 function jsonOrNull(data: string): any | null {
     try { return JSON.parse(data) }
     catch (e: any) { return null }
@@ -10,7 +24,7 @@ function jsonOrNull(data: string): any | null {
 export default abstract class Side<CS extends { socket: WebSocket }> {
     protected methodHandlers: Map<string, RTMethodHandler<(data: any, source: CS) => Promise<unknown>>> = new Map();
     protected eventHandlers: Map<string, RTEventHandler<(data: any, source: CS) => void>> = new Map();
-    protected callbacks: Map<number, Callback<Error | RPCError>> = new Map();
+    protected callbacks: Map<string, Callback<Error | RPCError>> = new Map();
 
     private safeMode: boolean;
 
@@ -148,7 +162,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
     }
 
     protected _call<Req, Resp, M extends Method<Req, Resp>>(socket: WebSocket, method: M) {
-        const data: RequestData = { index: Math.floor(Math.random() * Number.MAX_VALUE), name: method.name, payload: method.request };
+        const data: RequestData = { index: genIndex(INDEX_DIFFICULTY), name: method.name, payload: method.request };
         const toSend: Message = {
             type: MessageType.Method,
             content: data
