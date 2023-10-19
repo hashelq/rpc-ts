@@ -36,7 +36,7 @@ describe('server and client', () => {
         expect(await event.with(client)).to.equal(`Hello, ${NAME} from the server!`);
         expect(await event.withs(server, server.clients.get(0))).to.equal(`Hello, ${NAME} from a client!`);
 
-        [server, client].map(x => x.close());
+        [server, client].forEach(x => x.close());
     });
 
     it('should work well with array+composite types', async () => {
@@ -94,6 +94,6 @@ describe('server and client', () => {
 
         expect(response.friends[0].firstname).to.equal("Madoka");
         
-        [server, client].map(x => x.close());
+        [server, client].forEach(x => x.close());
     });
 });
