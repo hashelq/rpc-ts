@@ -11,7 +11,6 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
     protected methodHandlers: Map<string, RTMethodHandler<(data: any, source: CS) => Promise<unknown>>> = new Map();
     protected eventHandlers: Map<string, RTEventHandler<(data: any, source: CS) => void>> = new Map();
     protected callbacks: Map<number, Callback<Error | RPCError>> = new Map();
-    protected methodIndex = 0;
 
     private safeMode: boolean;
 
@@ -149,7 +148,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
     }
 
     protected _call<Req, Resp, M extends Method<Req, Resp>>(socket: WebSocket, method: M) {
-        const data: RequestData = { index: this.methodIndex++, name: method.name, payload: method.request };
+        const data: RequestData = { index: Math.floor(Math.random() * Number.MAX_VALUE), name: method.name, payload: method.request };
         const toSend: Message = {
             type: MessageType.Method,
             content: data
