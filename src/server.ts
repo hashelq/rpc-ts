@@ -5,7 +5,7 @@ import { Event, Method } from './types.js';
 const DEFAULT_TIMEOUT = 60 * 1000;
 
 export default class Server<S = void> extends Side<{ id: number, socket: WebSocket, session: S }> {
-    private wss: WebSocketServer;
+    public wss: WebSocketServer;
 
     private clientIndex = 0;
     public clients: Map<number, WebSocket> = new Map();
