@@ -17,9 +17,9 @@ enum ConnectError {
 }
 
 export default class Client extends Side<{ socket: WebSocket }> {
-    private endpoint: string;
-    private state: ClientState = ClientState.NotConnected;
-    private ws: WebSocket | undefined;
+    public endpoint: string;
+    public state: ClientState = ClientState.NotConnected;
+    public ws: WebSocket | undefined;
 
     constructor({
         endpoint,
