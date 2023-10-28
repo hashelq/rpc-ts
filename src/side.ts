@@ -25,8 +25,8 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
     abstract genCallbackIndex(socket: WebSocket, q: number): CBIndexType;
 
     private handleProtocolError(message: string) {
-      if (this.safeMode)
-        return;
+        if (this.safeMode)
+            return;
 
       throw new Error(message);
     }
