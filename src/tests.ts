@@ -31,10 +31,10 @@ describe('server and client', () => {
         client.onMethod(new Hello, async (name) => `Hello, ${name} from a client!`);
 
         const NAME = 'UNIVERSE';
-        const event = new Hello(NAME);
+        const method = new Hello(NAME);
 
-        expect(await event.with(client)).to.equal(`Hello, ${NAME} from the server!`);
-        expect(await event.withs(server, server.clients.get(0))).to.equal(`Hello, ${NAME} from a client!`);
+        expect(await method.with(client)).to.equal(`Hello, ${NAME} from the server!`);
+        expect(await method.withs(server, server.clients.get(0))).to.equal(`Hello, ${NAME} from a client!`);
 
         [server, client].forEach(x => x.close());
     });
