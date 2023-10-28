@@ -4,7 +4,25 @@ import { Event, Method } from './types.js';
 
 const DEFAULT_TIMEOUT = 60 * 1000;
 
-export default class Server<S = void> extends Side<{ id: number, socket: WebSocket, session: S }> {
+class TaggedWebSocket extends WebSocket {
+  public tag: number;
+
+  constructor(tag: number, address: null) {
+    super(address);
+
+    this.tag = tag;
+  }
+}
+
+function constructTaggedWebSocket(ws: WebSocket, tag: number): TaggedWebSocket {
+  let nws = <TaggedWebSocket> ws;
+  nws.tag = tag;
+  return nws;
+}
+
+type CBIndexType = string;
+
+export default class Server<S = void> extends Side<{ id: number, socket: WebSocket, session: S }, CBIndexType> {
     public wss: WebSocketServer;
 
     private clientIndex = 0;
@@ -32,6 +50,7 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
 
         this.wss.on('connection', (ws: WebSocket) => {
             const clientID = this.clientIndex++;
+            (<TaggedWebSocket> ws).tag = clientID;
 
             const source = { id: clientID, socket: ws, session: this.sessionInitializer(clientID) };
 
@@ -57,6 +76,15 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
                 this.onNewClient(clientID, ws);
         });
     } 
+
+    genCallbackIndex(socket: WebSocket, q: number): CBIndexType {
+      let w = <TaggedWebSocket> socket;
+
+      if (w.tag === undefined)
+        throw new Error(`Got a ws on server without a tag!`);
+
+      return `${w.tag}-${q}`;
+    }
 
     public sendEvent<E extends Event<any>>(clientWS: WebSocket, event: E) {
       return this._sendEvent(clientWS, event);

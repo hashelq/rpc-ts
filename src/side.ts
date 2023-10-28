@@ -2,38 +2,27 @@ import { RTMethodHandler, RTEventHandler, Callback, Message, MessageType, Event,
 import { isLeft } from 'fp-ts/lib/Either.js';
 import { WebSocket } from 'ws';
 
-const INDEX_DIFFICULTY: number = 32;
-
-function genIndex(length: number): string {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    let counter = 0;
-    while (counter < length) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
-    }
-    return `${new Date().getTime()}___${result}`;
-}
-
 function jsonOrNull(data: string): any | null {
     try { return JSON.parse(data) }
     catch (e: any) { return null }
 }
 
-export default abstract class Side<CS extends { socket: WebSocket }> {
+export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType> {
     protected methodHandlers: Map<string, RTMethodHandler<(data: any, source: CS) => Promise<unknown>>> = new Map();
     protected eventHandlers: Map<string, RTEventHandler<(data: any, source: CS) => void>> = new Map();
-    protected callbacks: Map<string, Callback<Error | RPCError>> = new Map();
+    protected callbacks: Map<CBIndexType, Callback<Error | RPCError>> = new Map();
+    private methodIndex = 0;
 
     private safeMode: boolean;
 
-    public methodTimeout: number;
+    public methodTimeout: number; 
 
     constructor({ safeMode, methodTimeout }: { safeMode: boolean, methodTimeout?: number }) {
         this.methodTimeout = methodTimeout;
         this.safeMode = safeMode;
     }
+
+    abstract genCallbackIndex(socket: WebSocket, q: number): CBIndexType;
 
     private handleProtocolError(message: string) {
       if (this.safeMode)
@@ -78,8 +67,9 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
         source.socket.send(JSON.stringify(toSend));
     }
 
-    protected onMessageResponse(response: ResponseData) {
-        const callback = this.callbacks.get(response.index);
+    protected onMessageResponse(response: ResponseData, source: CS) {
+        const index = this.genCallbackIndex(source.socket, response.index)
+        const callback = this.callbacks.get(index);
 
         if (callback === undefined)
           return this.handleProtocolError(`No callback found: ${response.index}`);
@@ -97,7 +87,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
             resolve(decoded.right);
         }
 
-        this.callbacks.delete(response.index);
+        this.callbacks.delete(index);
     }
 
     protected onMessageEvent(event: EventData, source: CS) {
@@ -138,7 +128,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
                 if (isLeft(decodedRes))
                     return this.handleProtocolError("Response body malformed.");
 
-                this.onMessageResponse(decodedRes.right);
+                this.onMessageResponse(decodedRes.right, source);
                 break;
 
             case MessageType.Event:
@@ -162,7 +152,8 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
     }
 
     protected _call<Req, Resp, M extends Method<Req, Resp>>(socket: WebSocket, method: M) {
-        const data: RequestData = { index: genIndex(INDEX_DIFFICULTY), name: method.name, payload: method.request };
+        const data: RequestData = { index: this.methodIndex++, name: method.name, payload: method.request };
+        const index = this.genCallbackIndex(socket, data.index);
         const toSend: Message = {
             type: MessageType.Method,
             content: data
@@ -173,7 +164,7 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
 
         // wait
         return new Promise((resolve, reject) => {
-            this.callbacks.set(data.index, {
+            this.callbacks.set(index, {
                 rtResponse: method.rtResponse,
                 resolve,
                 reject,
@@ -183,11 +174,11 @@ export default abstract class Side<CS extends { socket: WebSocket }> {
             // Timeout for a timeout!
             // IDEA: clear timeout?
             setTimeout(() => {
-                const callback = this.callbacks.get(data.index);
+                const callback = this.callbacks.get(index);
                 if (callback) {
                     callback.reject(new Error('timeout'));
 
-                    this.callbacks.delete(data.index);
+                    this.callbacks.delete(index);
                 };
             }, this.methodTimeout);
         });

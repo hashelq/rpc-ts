@@ -16,7 +16,7 @@ enum ConnectError {
     Connected
 }
 
-export default class Client extends Side<{ socket: WebSocket }> {
+export default class Client extends Side<{ socket: WebSocket }, number> {
     public endpoint: string;
     public state: ClientState = ClientState.NotConnected;
     public ws: WebSocket | undefined;
@@ -63,6 +63,10 @@ export default class Client extends Side<{ socket: WebSocket }> {
                     break;
             }
         })
+    }
+
+    genCallbackIndex(_: WebSocket, q: number): number {
+      return q;
     }
 
     public sendEvent<E extends Event<any>>(event: E) {
