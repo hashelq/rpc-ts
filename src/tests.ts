@@ -25,75 +25,79 @@ async function getBoth(): Promise<{ client: Client, server: Server }> {
 describe('server and client', () => {
     it('should create server/client and check method "Hello"', async () => {
         const { server, client } = await getBoth();
-        class Hello extends Method<string, string> { name = 'Hello'; rtRequest = t.string; rtResponse = t.string; };
+        try {
+          class Hello extends Method<string, string> { name = 'Hello'; rtRequest = t.string; rtResponse = t.string; };
 
-        server.onMethod(new Hello, async (name) => `Hello, ${name} from the server!`);
-        client.onMethod(new Hello, async (name) => `Hello, ${name} from a client!`);
+          server.onMethod(new Hello, async (name) => `Hello, ${name} from the server!`);
+          client.onMethod(new Hello, async (name) => `Hello, ${name} from a client!`);
 
-        const NAME = 'UNIVERSE';
-        const method = new Hello(NAME);
+          const NAME = 'UNIVERSE';
+          const method = new Hello(NAME);
 
-        expect(await method.with(client)).to.equal(`Hello, ${NAME} from the server!`);
-        expect(await method.withs(server, server.clients.get(0))).to.equal(`Hello, ${NAME} from a client!`);
-
-        [server, client].forEach(x => x.close());
+          expect(await method.with(client)).to.equal(`Hello, ${NAME} from the server!`);
+          expect(await method.withs(server, server.clients.get(0))).to.equal(`Hello, ${NAME} from a client!`);
+        } finally {
+          [server, client].forEach(x => x.close());
+        }
     });
 
     it('should work well with array+composite types', async () => {
         const { server, client } = await getBoth();
-        const ServerUsers = [{
-            firstname: "Madoka",
-            lastname: "Kaname",
-            age: 14,
-            friends: [1],
-        }, {
-            firstname: "Homura",
-            lastname: "Akemi",
-            age: 14,
-            friends: [0],
-        }, {
-          firstname: "Kyuubey",
-          lastname: "[DATA DELETED]",
-          age: -1,
-          friends: []
-        }];
+        try {
+          const ServerUsers = [{
+              firstname: "Madoka",
+              lastname: "Kaname",
+              age: 14,
+              friends: [1],
+          }, {
+              firstname: "Homura",
+              lastname: "Akemi",
+              age: 14,
+              friends: [0],
+          }, {
+            firstname: "Kyuubey",
+            lastname: "[DATA DELETED]",
+            age: -1,
+            friends: []
+          }];
 
-        // https://github.com/gcanti/io-ts/blob/master/index.md#recursive-types
-        interface User {
-          firstname: string,
-          lastname: string,
-          age: number,
-          friends: User[]
-        };
-
-        const User: t.Type<User> = t.recursion("User", () => t.type({
-            firstname: t.string,
-            lastname: t.string,
-            age: t.number,
-            friends: t.array(User)
-        }));
-
-        const FindUser = Method.new("FindUser", t.string, User);
-
-        server.onMethod(new FindUser, async username => {
-          const user = ServerUsers.filter(x => `${x.firstname} ${x.lastname}` === username)[0];
-          
-          return {
-            ...user,
-
-            friends: user.friends.map(x => {
-              return {
-                ... ServerUsers[x],
-                friends: []
-              };
-            })
+          // https://github.com/gcanti/io-ts/blob/master/index.md#recursive-types
+          interface User {
+            firstname: string,
+            lastname: string,
+            age: number,
+            friends: User[]
           };
-        });
 
-        const response = await (new FindUser("Homura Akemi").with(client));
+          const User: t.Type<User> = t.recursion("User", () => t.type({
+              firstname: t.string,
+              lastname: t.string,
+              age: t.number,
+              friends: t.array(User)
+          }));
 
-        expect(response.friends[0].firstname).to.equal("Madoka");
-        
-        [server, client].forEach(x => x.close());
+          const FindUser = Method.new("FindUser", t.string, User);
+
+          server.onMethod(new FindUser, async username => {
+            const user = ServerUsers.filter(x => `${x.firstname} ${x.lastname}` === username)[0];
+            
+            return {
+              ...user,
+
+              friends: user.friends.map(x => {
+                return {
+                  ... ServerUsers[x],
+                  friends: []
+                };
+              })
+            };
+          });
+
+          const response = await (new FindUser("Homura Akemi").with(client));
+
+          expect(response.friends[0].firstname).to.equal("Madoka");
+        } finally {
+          [server, client].forEach(x => x.close());
+        }
     });
 });
