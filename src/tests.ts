@@ -23,7 +23,7 @@ async function getBoth(): Promise<{ client: Client, server: Server }> {
 }
 
 describe('server and client', () => {
-    it('should create server/client and check method "Hello"', async () => {
+    it('Basic ClientToServer and ServerToClient RPC', async () => {
         const { server, client } = await getBoth();
         try {
             class Hello extends Method<string, string> { name = 'Hello'; rtRequest = t.string; rtResponse = t.string; };
@@ -41,7 +41,7 @@ describe('server and client', () => {
         }
     });
 
-    it('should handle sessions', async () => {
+    it('server socket-sessions', async () => {
         const server = new Server({ port: PORT_FOR_TESTING, sessionInitializer: () => 0 });
         const client = await createClient();
         
@@ -62,7 +62,7 @@ describe('server and client', () => {
         }
     });
 
-    it('should work well with array+composite types', async () => {
+    it('array+composite types', async () => {
         const { server, client } = await getBoth();
         try {
             const ServerUsers = [{
