@@ -41,6 +41,27 @@ describe('server and client', () => {
         }
     });
 
+    it('should handle sessions', async () => {
+        const server = new Server({ port: PORT_FOR_TESTING, sessionInitializer: () => 0 });
+        const client = await createClient();
+        
+        try {
+            const SetValue = Method.new('set-value', t.number, t.void);
+            const GetValue = Method.new('get-value', t.void, t.number);
+
+            server.onMethod(new SetValue, async (x, y) => {
+              y.session = x;
+            });
+
+            server.onMethod(new GetValue, async (_, y) => y.session);
+
+            await (new SetValue(42)).with(client);
+            expect(await (new GetValue).with(client)).to.equal(42);
+        } finally {
+            [server, client].forEach(x => x.close());
+        }
+    });
+
     it('should work well with array+composite types', async () => {
         const { server, client } = await getBoth();
         try {
