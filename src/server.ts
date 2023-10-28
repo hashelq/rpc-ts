@@ -13,12 +13,6 @@ class TaggedWebSocket extends WebSocket {
     }
 }
 
-function constructTaggedWebSocket(ws: WebSocket, tag: number): TaggedWebSocket {
-    let nws = <TaggedWebSocket> ws;
-    nws.tag = tag;
-    return nws;
-}
-
 type CBIndexType = string;
 
 export default class Server<S = void> extends Side<{ id: number, socket: WebSocket, session: S }, CBIndexType> {
