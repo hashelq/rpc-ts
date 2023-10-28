@@ -7,7 +7,7 @@
     "url": "https://github.com/hashelq/rpc-ts.git"
   },
   "description": "TypeScript Remote-procedure-call Framework",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "keywords": [
     "rpc",
     "typescript",
@@ -26,13 +26,13 @@
     "test": "tsc --esModuleInterop && mocha ./dist/tests.js"
   },
   "dependencies": {
+    "@types/ws": "^8.5.5",
     "fp-ts": "^2.16.0",
     "io-ts": "^2.2.20",
     "isomorphic-ws": "^5.0.0",
     "ws": "^8.13.0"
   },
   "devDependencies": {
-    "@types/ws": "^8.5.5",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "chai": "^4.3.7",
