@@ -10,8 +10,8 @@ const FindUser = Method.new("GetUser", t.string, t.type({ name: t.string, age: t
 const NewUser = Event.new("NewUser", t.string);
 
 // Implement a Method on the Server
-server.onMethod(new FindUser, name => { name: "Alice", age: 80000 });
-server.onEvent(new NewUser, name => console.log(`New user: ${name}`));
+server.onMethod(FindUser, name => { name: "Alice", age: 80000 });
+server.onEvent(NewUser, name => console.log(`New user: ${name}`));
 
 // Call it from the Client
 const { name, age } = await (new FindUser("Alice").with(client));
@@ -20,8 +20,8 @@ new NewUser("Hashelq").with(client)
 
 What is interesting, that everything you have just seen can also be used backwards!
 ```typescript
-client.onMethod(new FindUser, name => { name: "???", age: -1 });
-client.onEvent(new NewUser, name => console.log(`New user: ${name}`));
+client.onMethod(FindUser, name => { name: "???", age: -1 });
+client.onEvent(NewUser, name => console.log(`New user: ${name}`));
 
 const { name, age } = await (new FindUser("Alice").withs(server, server.clients[0]));
 new NewUser("HashElq").withs(client, server.clients[0]);

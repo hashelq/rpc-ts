@@ -28,8 +28,8 @@ describe('server and client', () => {
         try {
             class Hello extends Method<string, string> { name = 'Hello'; rtRequest = t.string; rtResponse = t.string; };
 
-            server.onMethod(new Hello, async (name) => `Hello, ${name} from the server!`);
-            client.onMethod(new Hello, async (name) => `Hello, ${name} from a client!`);
+            server.onMethod(Hello, async (name) => `Hello, ${name} from the server!`);
+            client.onMethod(Hello, async (name) => `Hello, ${name} from a client!`);
 
             const NAME = 'UNIVERSE';
             const method = new Hello(NAME);
@@ -49,11 +49,11 @@ describe('server and client', () => {
             const SetValue = Method.new('set-value', t.number, t.void);
             const GetValue = Method.new('get-value', t.void, t.number);
 
-            server.onMethod(new SetValue, async (x, y) => {
+            server.onMethod(SetValue, async (x, y) => {
               y.session = x;
             });
 
-            server.onMethod(new GetValue, async (_, y) => y.session);
+            server.onMethod(GetValue, async (_, y) => y.session);
 
             await (new SetValue(42)).with(client);
             expect(await (new GetValue).with(client)).to.equal(42);
@@ -99,7 +99,7 @@ describe('server and client', () => {
 
             const FindUser = Method.new("FindUser", t.string, User);
 
-            server.onMethod(new FindUser, async username => {
+            server.onMethod(FindUser, async username => {
               const user = ServerUsers.filter(x => `${x.firstname} ${x.lastname}` === username)[0];
               
               return {

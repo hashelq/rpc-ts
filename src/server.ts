@@ -28,12 +28,12 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
         port,
         methodTimeout = DEFAULT_TIMEOUT,
         onNewClient,
-        sessionInitializer,
+        sessionInitializer
     }: {
         port: number,
         methodTimeout?: number,
         onNewClient?: (clientID: number, clientWS: WebSocket) => void,
-        sessionInitializer: (id: number) => S
+        sessionInitializer?: (id: number) => S
     }) {
         super({ safeMode: true, methodTimeout});
         this.wss = new WebSocketServer({ port });
