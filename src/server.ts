@@ -5,19 +5,18 @@ import { Event, Method } from './types.js';
 const DEFAULT_TIMEOUT = 60 * 1000;
 
 class TaggedWebSocket extends WebSocket {
-  public tag: number;
+    public tag: number;
 
-  constructor(tag: number, address: null) {
-    super(address);
-
-    this.tag = tag;
-  }
+    constructor(tag: number, address: null) {
+        super(address);
+        this.tag = tag;
+    }
 }
 
 function constructTaggedWebSocket(ws: WebSocket, tag: number): TaggedWebSocket {
-  let nws = <TaggedWebSocket> ws;
-  nws.tag = tag;
-  return nws;
+    let nws = <TaggedWebSocket> ws;
+    nws.tag = tag;
+    return nws;
 }
 
 type CBIndexType = string;
@@ -78,20 +77,20 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
     } 
 
     genCallbackIndex(socket: WebSocket, q: number): CBIndexType {
-      let w = <TaggedWebSocket> socket;
+        let w = <TaggedWebSocket> socket;
 
-      if (w.tag === undefined)
-        throw new Error(`Got a ws on server without a tag!`);
+        if (w.tag === undefined)
+          throw new Error(`Got a ws on server without a tag!`);
 
-      return `${w.tag}-${q}`;
+        return `${w.tag}-${q}`;
     }
 
     public sendEvent<E extends Event<any>>(clientWS: WebSocket, event: E) {
-      return this._sendEvent(clientWS, event);
+        return this._sendEvent(clientWS, event);
     }
 
     public call<Req, Resp, M extends Method<Req, Resp>>(clientWS: WebSocket, method: M) {
-      return this._call(clientWS, method);
+        return this._call(clientWS, method);
     };
 
     broadcastEvent<E extends Event<any>>(event: E) {
@@ -101,6 +100,6 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
     }
 
     public close() {
-      return this.wss.close();
+        return this.wss.close();
     }
 };

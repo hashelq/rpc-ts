@@ -66,7 +66,7 @@ export default class Client extends Side<{ socket: WebSocket }, number> {
     }
 
     genCallbackIndex(_: WebSocket, q: number): number {
-      return q;
+        return q;
     }
 
     public sendEvent<E extends Event<any>>(event: E) {
@@ -78,7 +78,7 @@ export default class Client extends Side<{ socket: WebSocket }, number> {
     };
 
     public close() {
-      return this.ws.close();
+        return this.ws.close();
     }
 }
 
