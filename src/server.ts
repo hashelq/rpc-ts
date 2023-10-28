@@ -4,15 +4,6 @@ import { Event, Method } from './types.js';
 
 const DEFAULT_TIMEOUT = 60 * 1000;
 
-class TaggedWebSocket extends WebSocket {
-    public tag: number;
-
-    constructor(tag: number, address: null) {
-        super(address);
-        this.tag = tag;
-    }
-}
-
 type CBIndexType = string;
 
 export default class Server<S = void> extends Side<{ id: number, socket: WebSocket, session: S }, CBIndexType> {
@@ -43,7 +34,7 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
 
         this.wss.on('connection', (ws: WebSocket) => {
             const clientID = this.clientIndex++;
-            (<TaggedWebSocket> ws).tag = clientID;
+            (<any> ws).tag = clientID;
 
             const source = { id: clientID, socket: ws, session: this.sessionInitializer(clientID) };
 
@@ -71,7 +62,7 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
     } 
 
     genCallbackIndex(socket: WebSocket, q: number): CBIndexType {
-        let w = <TaggedWebSocket> socket;
+        let w = <any> socket;
 
         if (w.tag === undefined)
           throw new Error(`Got a ws on server without a tag!`);
