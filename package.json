@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "build": "tsc --esModuleInterop",
-    "publish": "npm run build && npm publish",
+    "do-publish": "npm run build && npm publish",
     "test": "tsc --esModuleInterop && mocha ./dist/tests.js"
   },
   "dependencies": {
