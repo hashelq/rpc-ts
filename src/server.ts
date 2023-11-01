@@ -36,9 +36,9 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
             const clientID = this.clientIndex++;
             (<any> ws).tag = clientID;
 
-            const source = { id: clientID, socket: ws, session: this.sessionInitializer(clientID) };
-
             this.clients.set(clientID, ws);
+
+            const source = { id: clientID, socket: ws, session: this.sessionInitializer(clientID) };
 
             const handlers = {
                 'error': (error: any) => {
