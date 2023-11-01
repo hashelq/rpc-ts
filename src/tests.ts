@@ -5,7 +5,7 @@ import * as t from "io-ts";
 const PORT_FOR_TESTING = 60123;
 
 function createServer(): Server {
-    return new Server({ port: PORT_FOR_TESTING, sessionInitializer: () => { } });
+    return new Server({ port: PORT_FOR_TESTING, sessionInit: () => {} });
 }
 
 async function createClient(): Promise<Client> {
@@ -42,7 +42,7 @@ describe('server and client', () => {
     });
 
     it('server socket-sessions', async () => {
-        const server = new Server({ port: PORT_FOR_TESTING, sessionInitializer: () => 0 });
+        const server = new Server({ port: PORT_FOR_TESTING, sessionInit: () => 0 });
         const client = await createClient();
         
         try {

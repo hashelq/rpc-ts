@@ -12,26 +12,18 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
 
     private clientIndex = 0;
     public clients: Map<number, WebSocket> = new Map();
-    public onNewClient: (clientID: number, clientWS: WebSocket, request: IncomingMessage) => void;
-
-    public sessionInitializer: (id: number) => S;
 
     constructor({
         port,
         methodTimeout = DEFAULT_TIMEOUT,
-        onNewClient,
-        sessionInitializer
+        sessionInit
     }: {
         port: number,
         methodTimeout?: number,
-        onNewClient?: (clientID: number, clientWS: WebSocket) => void,
-        sessionInitializer?: (id: number) => S
+        sessionInit?: (clientID: number, clientWS: WebSocket, request: IncomingMessage) => S
     }) {
         super({ safeMode: true, methodTimeout});
         this.wss = new WebSocketServer({ port });
-
-        this.sessionInitializer = sessionInitializer;
-        this.onNewClient = onNewClient;
 
         this.wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
             const clientID = this.clientIndex++;
@@ -39,7 +31,11 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
 
             this.clients.set(clientID, ws);
 
-            const source = { id: clientID, socket: ws, session: this.sessionInitializer(clientID) };
+            const source = {
+              id: clientID,
+              socket: ws,
+              session: sessionInit(clientID, ws, request)
+            };
 
             const handlers = {
                 'error': (error: any) => {
@@ -56,9 +52,6 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
             for (const event in handlers) {
                 ws.on(event, handlers[event]);
             }
-
-            if (this.onNewClient)
-                this.onNewClient(clientID, ws, request);
         });
     } 
 

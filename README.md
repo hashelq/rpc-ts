@@ -43,7 +43,7 @@ interface Session {
   lastMessage: string
 };
 
-const server = new Server<Session>({ sessionInitializer: () => { lastMessage: "" } /* other params */});
+const server = new Server<Session>({ sessionInit: () => { lastMessage: "" } /* other params */});
 
 server.onEvent(..., (message: string, { _socket, session } => {
   session.lastMessage = message;
