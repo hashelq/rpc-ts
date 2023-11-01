@@ -1,4 +1,5 @@
 import { WebSocketServer, WebSocket } from 'ws';
+import { IncomingMessage } from 'http';
 import Side from './side.js';
 import { Event, Method } from './types.js';
 
@@ -11,7 +12,7 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
 
     private clientIndex = 0;
     public clients: Map<number, WebSocket> = new Map();
-    public onNewClient: (clientID: number, clientWS: WebSocket) => void;
+    public onNewClient: (clientID: number, clientWS: WebSocket, request: IncomingMessage) => void;
 
     public sessionInitializer: (id: number) => S;
 
@@ -32,7 +33,7 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
         this.sessionInitializer = sessionInitializer;
         this.onNewClient = onNewClient;
 
-        this.wss.on('connection', (ws: WebSocket) => {
+        this.wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
             const clientID = this.clientIndex++;
             (<any> ws).tag = clientID;
 
@@ -57,7 +58,7 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
             }
 
             if (this.onNewClient)
-                this.onNewClient(clientID, ws);
+                this.onNewClient(clientID, ws, request);
         });
     } 
 
