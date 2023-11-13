@@ -68,6 +68,8 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
         };
         
         const jdata = JSON.stringify(toSend);
+        
+        // FIMXE: unhandled send error
         source.socket.send(jdata);
 
         if (this.debugLoggerSend) this.debugLoggerSend(jdata, source.socket);
