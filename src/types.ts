@@ -75,11 +75,11 @@ class Event<Data> {
         };
     }
 
-    async with(client: Client) {
-        return await client.sendEvent(this);
+    with(client: Client): Promise<void> {
+        return client.sendEvent(this);
     }
 
-    withs(server: Server<any>, ws: WebSocket) {
+    withs(server: Server<any>, ws: WebSocket): Promise<void> {
         return server.sendEvent(ws, this);
     }
 }
