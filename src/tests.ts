@@ -19,6 +19,13 @@ async function createClient(): Promise<Client> {
 async function getBoth(): Promise<{ client: Client, server: Server }> {
     const server = createServer();
     const client = await createClient();
+
+    server.debugLoggerSend = s => console.log(`Client > ${s}`);
+    server.debugLoggerReceive = s => console.log(`Client < ${s}`);
+
+    client.debugLoggerSend = s => console.log(`Server > ${s}`);
+    client.debugLoggerReceive = s => console.log(`Server < ${s}`);
+
     return { server, client };
 }
 

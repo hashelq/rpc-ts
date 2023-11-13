@@ -17,6 +17,9 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
 
     public methodTimeout: number; 
 
+    public debugLoggerSend?: (data: string, socket: WebSocket) => void;
+    public debugLoggerReceive?: (data: string, source: CS) => void;
+
     constructor({ safeMode, methodTimeout }: { safeMode: boolean, methodTimeout?: number }) {
         this.methodTimeout = methodTimeout;
         this.safeMode = safeMode;
@@ -64,7 +67,10 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
             content: response
         };
         
-        source.socket.send(JSON.stringify(toSend));
+        const jdata = JSON.stringify(toSend);
+        source.socket.send(jdata);
+
+        if (this.debugLoggerSend) this.debugLoggerSend(jdata, source.socket);
     }
 
     protected onMessageResponse(response: ResponseData, source: CS) {
@@ -104,6 +110,8 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
     }
 
     protected onMessage(raw: string, source: CS) {
+        if (this.debugLoggerReceive) this.debugLoggerReceive(raw, source);
+
         const message: object | null = jsonOrNull(raw.toString());
         if (message === null)
             return this.handleProtocolError("Failed to parse a JSON message body.");
@@ -148,7 +156,9 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
             type: MessageType.Event,
             content: event
         };
-        socket.send(JSON.stringify(toSend));
+        const data = JSON.stringify(toSend);
+        socket.send(data);
+        if (this.debugLoggerSend) this.debugLoggerSend(data, socket);
     }
 
     protected _call<Req, Resp, M extends Method<Req, Resp>>(socket: WebSocket, method: M) {
@@ -160,7 +170,10 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
         };
 
         // send
-        socket.send(JSON.stringify(toSend));
+        const jdata = JSON.stringify(toSend);
+        socket.send(jdata);
+        
+        if (this.debugLoggerSend) this.debugLoggerSend(jdata, socket);
 
         // wait
         return new Promise((resolve, reject) => {
