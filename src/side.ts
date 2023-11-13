@@ -151,32 +151,34 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
         }
     }
 
-    protected _sendEvent<E extends Event<any>>(socket: WebSocket, event: E) {
-        const toSend: Message = {
-            type: MessageType.Event,
-            content: event
-        };
-        const data = JSON.stringify(toSend);
-        socket.send(data);
-        if (this.debugLoggerSend) this.debugLoggerSend(data, socket);
+    protected _sendEvent<E extends Event<any>>(socket: WebSocket, event: E): Promise<void> {
+        return new Promise((res, rej) => {
+          const toSend: Message = {
+              type: MessageType.Event,
+              content: event
+          };
+          const data = JSON.stringify(toSend);
+          if (this.debugLoggerSend) this.debugLoggerSend(data, socket);
+          socket.send(data, x => x ? rej(x) : res());
+        })
     }
 
     protected _call<Req, Resp, M extends Method<Req, Resp>>(socket: WebSocket, method: M) {
-        const data: RequestData = { index: this.methodIndex++, name: method.name, payload: method.request };
-        const index = this.genCallbackIndex(socket, data.index);
-        const toSend: Message = {
-            type: MessageType.Method,
-            content: data
-        };
-
-        // send
-        const jdata = JSON.stringify(toSend);
-        socket.send(jdata);
-        
-        if (this.debugLoggerSend) this.debugLoggerSend(jdata, socket);
-
-        // wait
         return new Promise((resolve, reject) => {
+            const data: RequestData = { index: this.methodIndex++, name: method.name, payload: method.request };
+            const index = this.genCallbackIndex(socket, data.index);
+            const toSend: Message = {
+                type: MessageType.Method,
+                content: data
+            };
+
+            // send
+            const jdata = JSON.stringify(toSend);
+            socket.send(jdata, x => x ? reject(x) : undefined);
+            
+            if (this.debugLoggerSend) this.debugLoggerSend(jdata, socket);
+
+            // wait
             this.callbacks.set(index, {
                 rtResponse: method.rtResponse,
                 resolve,
