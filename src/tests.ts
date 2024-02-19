@@ -1,24 +1,30 @@
 import { expect } from 'chai';
 import { Client, Method, Server } from './index.js';
 import * as t from "io-ts";
+import WebSocketServerImpl from './servers/wss.js';
+import { WebSocketServer } from 'ws';
+import WebSocketImpl from './sockets/ws.js';
 
 const PORT_FOR_TESTING = 60123;
 
-function createServer(): Server {
-    return new Server({ port: PORT_FOR_TESTING, sessionInit: () => {} });
+function createWSServerImpl() {
+  return new WebSocketServerImpl(new WebSocketServer({ port: PORT_FOR_TESTING }));
 }
 
-async function createClient(): Promise<Client> {
-    const client = new Client({
-        endpoint: 'ws://127.0.0.1:' + PORT_FOR_TESTING
-    });
+function createWSServer(): Server {
+    return new Server({ server: createWSServerImpl(), sessionInit: () => {} });
+}
+
+async function createWSClient(): Promise<Client> {
+    const socket = new WebSocketImpl('ws://127.0.0.1:' + PORT_FOR_TESTING);
+    const client = new Client({ socket });
     await client.connect();
     return client;
 }
 
-async function getBoth(): Promise<{ client: Client, server: Server }> {
-    const server = createServer();
-    const client = await createClient();
+async function createWSEnvironment(): Promise<{ client: Client, server: Server }> {
+    const server = createWSServer();
+    const client = await createWSClient();
 
     server.debugLoggerSend = s => console.log(`Client > ${s}`);
     server.debugLoggerReceive = s => console.log(`Client < ${s}`);
@@ -31,7 +37,7 @@ async function getBoth(): Promise<{ client: Client, server: Server }> {
 
 describe('server and client', () => {
     it('Basic ClientToServer and ServerToClient RPC', async () => {
-        const { server, client } = await getBoth();
+        const { server, client } = await createWSEnvironment();
         try {
             class Hello extends Method<string, string> { name = 'Hello'; rtRequest = t.string; rtResponse = t.string; };
 
@@ -49,8 +55,8 @@ describe('server and client', () => {
     });
 
     it('server socket-sessions', async () => {
-        const server = new Server({ port: PORT_FOR_TESTING, sessionInit: () => 0 });
-        const client = await createClient();
+        const server = new Server({ server: createWSServerImpl(), sessionInit: () => 0 });
+        const client = await createWSClient();
         
         try {
             const SetValue = Method.new('set-value', t.number, t.void);
@@ -70,7 +76,7 @@ describe('server and client', () => {
     });
 
     it('array+composite types', async () => {
-        const { server, client } = await getBoth();
+        const { server, client } = await createWSEnvironment();
         try {
             const ServerUsers = [{
                 firstname: "Madoka",

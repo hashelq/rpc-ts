@@ -1,13 +1,13 @@
 import { RTMethodHandler, RTEventHandler, Callback, Message, MessageType, Event, Method, RequestData, ResponseData, RPCError, RequestData__RT, Message__RT, ResponseData__RT, EventData__RT, EventData } from './types.js';
 import { isLeft } from 'fp-ts/lib/Either.js';
-import { WebSocket } from 'ws';
+import AbstractSocket from './sockets/abstract.js';
 
 function jsonOrNull(data: string): any | null {
     try { return JSON.parse(data) }
     catch (e: any) { return null }
 }
 
-export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType> {
+export default abstract class Side<Socket extends AbstractSocket, CS extends { socket: Socket }, CBIndexType> {
     protected methodHandlers: Map<string, RTMethodHandler<(data: any, source: CS) => Promise<unknown>>> = new Map();
     protected eventHandlers: Map<string, RTEventHandler<(data: any, source: CS) => void>> = new Map();
     protected callbacks: Map<CBIndexType, Callback<Error | RPCError>> = new Map();
@@ -17,7 +17,7 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
 
     public methodTimeout: number; 
 
-    public debugLoggerSend?: (data: string, socket: WebSocket) => void;
+    public debugLoggerSend?: (data: string, socket: Socket) => void;
     public debugLoggerReceive?: (data: string, source: CS) => void;
 
     constructor({ safeMode, methodTimeout }: { safeMode: boolean, methodTimeout?: number }) {
@@ -25,7 +25,7 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
         this.safeMode = safeMode;
     }
 
-    abstract genCallbackIndex(socket: WebSocket, q: number): CBIndexType;
+    abstract genCallbackIndex(socket: Socket, q: number): CBIndexType;
 
     private handleProtocolError(message: string) {
         if (this.safeMode)
@@ -153,20 +153,18 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
         }
     }
 
-    protected _sendEvent<E extends Event<any>>(socket: WebSocket, event: E): Promise<void> {
-        return new Promise((res, rej) => {
+    protected async _sendEvent<E extends Event<any>>(socket: Socket, event: E): Promise<void> {
           const toSend: Message = {
               type: MessageType.Event,
               content: event
           };
           const data = JSON.stringify(toSend);
           if (this.debugLoggerSend) this.debugLoggerSend(data, socket);
-          socket.send(data, x => x ? rej(x) : res());
-        })
+          return await socket.send(data);
     }
 
-    protected _call<Req, Resp, M extends Method<Req, Resp>>(socket: WebSocket, method: M) {
-        return new Promise((resolve, reject) => {
+    protected _call<Req, Resp, M extends Method<Req, Resp>>(socket: Socket, method: M) {
+        return new Promise(async (resolve, reject) => {
             const data: RequestData = { index: this.methodIndex++, name: method.name, payload: method.request };
             const index = this.genCallbackIndex(socket, data.index);
             const toSend: Message = {
@@ -176,7 +174,11 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
 
             // send
             const jdata = JSON.stringify(toSend);
-            socket.send(jdata, x => x ? reject(x) : undefined);
+            try {
+              await socket.send(jdata);
+            } catch (e: any) {
+              reject(e);
+            }
             
             if (this.debugLoggerSend) this.debugLoggerSend(jdata, socket);
 
@@ -218,12 +220,12 @@ export default abstract class Side<CS extends { socket: WebSocket }, CBIndexType
     }
 
     public onEvent<A, Data extends A>(eventClass: ( new() => Event<A> ), fn: (data: Data, source: CS) => void) {
-        const signature = new eventClass;
+      const signature = new eventClass;
 
-        if (signature.rtData === undefined)
-            throw new Error("rtData of an event cannot be undefined!");
+      if (signature.rtData === undefined)
+          throw new Error("rtData of an event cannot be undefined!");
 
-        const name = signature.name;
-        this.eventHandlers.set(name, { rtData: signature.rtData, fn });
+      const name = signature.name;
+      this.eventHandlers.set(name, { rtData: signature.rtData, fn });
     }
 }

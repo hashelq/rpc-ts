@@ -2,6 +2,7 @@ import * as t from "io-ts";
 import Client from './client.js';
 import Server from './server.js';
 import WebSocket = require('ws');
+import AbstractSocket from "./sockets/abstract.js";
 
 interface Callback<Error> {
     rtResponse: t.Type<any, any>;
@@ -42,11 +43,11 @@ class Method<Request, Response> {
         };
     }
 
-    async with(client: Client): Promise<Response> {
+    async with(client: Client<any>): Promise<Response> {
         return await client.call(this) as Response;
     }
 
-    async withs(server: Server<any>, client: WebSocket): Promise<Response> {
+    async withs<Socket extends AbstractSocket>(server: Server<Socket, any, any, any>, client: Socket): Promise<Response> {
         return await server.call(client, this) as Response;
     }
 }
@@ -75,12 +76,12 @@ class Event<Data> {
         };
     }
 
-    with(client: Client): Promise<void> {
+    with(client: Client<any>): Promise<void> {
         return client.sendEvent(this);
     }
 
-    withs(server: Server<any>, ws: WebSocket): Promise<void> {
-        return server.sendEvent(ws, this);
+    withs<Socket extends AbstractSocket>(server: Server<Socket, any, any, any>, socket: Socket): Promise<void> {
+        return server.sendEvent(socket, this);
     }
 }
 
