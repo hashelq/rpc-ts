@@ -27,10 +27,14 @@ const { name, age } = await (new FindUser("Alice").withs(server, server.clients[
 new NewUser("HashElq").withs(client, server.clients[0]);
 ```
 
-### How it works
-The RPC works on top of the `WebSockets` protocol.
+### Too complicated
+`src/tests.ts` - is a great source of finding ways to create a websocket RPC environment.
 
+### How it works
 A human readable JSON text is sent between the server and client sides.
+
+Default protocol to use is `WS`.
+In fact you can implement any protocol you want to use with the lib.
 
 ### Compatibility
 `rpc-with-types` is tested against:
