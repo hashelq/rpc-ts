@@ -33,9 +33,9 @@ The RPC works on top of the `WebSockets` protocol.
 A human readable JSON text is sent between the server and client sides.
 
 ### Compatibility
-To run a server, you need to have an appropriate nodejs-like runtime.
-
-The client side can work in a modern browser (thanks isomorphic-ws) and a nodejs-like runtime.
+`rpc-with-types` is tested against:
+* nodejs 20.11.0
+* bun 1.0.26
 
 ### Sessions
 ```typescript
