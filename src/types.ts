@@ -55,8 +55,8 @@ class Method<Request, Response> {
 }
 
 const EventData__RT = t.type({
-  data: t.any,
-  name: t.string,
+  d: t.any,
+  n: t.string,
 });
 
 type EventData = t.TypeOf<typeof EventData__RT>;
@@ -91,17 +91,27 @@ class Event<Data> {
 }
 
 const RequestData__RT = t.type({
-  index: t.number,
-  name: t.string,
-  payload: t.any,
+  // INDEX
+  i: t.number,
+
+  // NAME
+  n: t.string,
+
+  // PAYLOAD
+  p: t.any,
 });
 
 type RequestData = t.TypeOf<typeof RequestData__RT>;
 
 const ResponseData__RT = t.type({
-  index: t.number,
-  payload: t.any,
-  errorRPC: t.union([t.string, t.undefined]),
+  // INDEX
+  i: t.number,
+
+  // PAYLOAD
+  p: t.any,
+
+  // ERROR_RPC
+  e: t.union([t.string, t.undefined]),
 });
 
 type ResponseData = t.TypeOf<typeof ResponseData__RT>;
@@ -122,8 +132,8 @@ enum MessageType {
 }
 
 const Message__RT = t.type({
-  type: t.number,
-  content: t.any,
+  t: t.number,
+  c: t.any,
 });
 
 type Message = t.TypeOf<typeof Message__RT>;
