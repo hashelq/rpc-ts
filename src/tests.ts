@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Client, Method, Server } from "./index.js";
+import { Client, Event, Method, Server } from "./index.js";
 import * as t from "io-ts";
 import WebSocketServerImpl from "./servers/wss.js";
 import { WebSocketServer } from "ws";
@@ -62,6 +62,43 @@ describe("server and client", () => {
       expect(await method.withs(server, server.clients.get(0))).to.equal(
         `Hello, ${NAME} from a client!`,
       );
+    } finally {
+      [server, client].forEach((x) => x.close());
+    }
+  });
+
+  it("basic event dispath", async () => {
+    const { server, client } = await createWSEnvironment();
+    try {
+      const Hello = Event.new("test", t.string);
+      const value = "xyz";
+      let counter = 0;
+      
+      let trigger = () => {};
+      let promise = new Promise<void>(res => {
+        trigger = () => {
+          if (counter === 2)
+            res();
+        };
+      });
+
+      client.onEvent(Hello, async (s) => {
+        s === value ? counter++ : null;
+
+        trigger();
+      });
+      server.onEvent(Hello, async (s) => {
+        s === value ? counter++ : null;
+
+        trigger();
+      });
+
+      const event = new Hello(value);
+      await event.with(client);
+      await event.withs(server, server.clients.get(0)); 
+
+      await promise;
+      expect(counter).to.equal(2);
     } finally {
       [server, client].forEach((x) => x.close());
     }
