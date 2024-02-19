@@ -1,61 +1,57 @@
-import { WebSocketServer, WebSocket } from 'ws';
 import { IncomingMessage } from 'http';
 import Side from './side.js';
 import { Event, Method } from './types.js';
+import AbstractSocket from './sockets/abstract.js';
+import AbstractServer from './servers/abstract.js';
 
 const DEFAULT_TIMEOUT = 60 * 1000;
 
 type CBIndexType = string;
 
-export default class Server<S = void> extends Side<{ id: number, socket: WebSocket, session: S }, CBIndexType> {
-    public wss: WebSocketServer;
+export default class Server<Socket extends AbstractSocket = any, RequestMessage = any, ServerImplementation extends AbstractServer<Socket, RequestMessage> = any, S = void> extends Side<Socket, { id: number, socket: Socket, session: S }, CBIndexType> {
+    public server: ServerImplementation;
 
     private clientIndex = 0;
-    public clients: Map<number, WebSocket> = new Map();
+    public clients: Map<number, Socket> = new Map();
 
     constructor({
-        port,
+        server,
         methodTimeout = DEFAULT_TIMEOUT,
         sessionInit
     }: {
-        port: number,
+        server: ServerImplementation,
         methodTimeout?: number,
-        sessionInit?: (clientID: number, clientWS: WebSocket, request: IncomingMessage) => S
+        sessionInit?: (clientID: number, clientSocket: Socket, request: RequestMessage) => S
     }) {
         super({ safeMode: true, methodTimeout});
-        this.wss = new WebSocketServer({ port });
-
-        this.wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
+        this.server = server;
+        this.server.on('connection', (socket: Socket, request: RequestMessage) => {
             const clientID = this.clientIndex++;
-            (<any> ws).tag = clientID;
+            (<any> socket).tag = clientID;
 
-            this.clients.set(clientID, ws);
+            this.clients.set(clientID, socket);
 
             const source = {
               id: clientID,
-              socket: ws,
-              session: sessionInit(clientID, ws, request)
+              socket: socket,
+              session: sessionInit(clientID, socket, request)
             };
 
-            const handlers = {
-                'error': (error: any) => {
-                    console.error('error', error);
-                },
+            socket.on('message', (message: string) => {
+              this.onMessage(message, source);
+            });
 
-                'message': (message: string) => this.onMessage(message, source),
+            socket.on('error', (error: any) => {
+              console.error('error', error);
+            });
 
-                'close': () => {
-                    this.clients.delete(clientID)
-                }
-            };
-
-            for (const event in handlers) {
-                ws.on(event, handlers[event]);
-            }
+            socket.on('close', () => {
+              this.clients.delete(clientID)
+            });
         });
     } 
 
-    genCallbackIndex(socket: WebSocket, q: number): CBIndexType {
+    genCallbackIndex(socket: Socket, q: number): CBIndexType {
         let w = <any> socket;
 
         if (w.tag === undefined)
@@ -64,12 +60,12 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
         return `${w.tag}-${q}`;
     }
 
-    public sendEvent<E extends Event<any>>(clientWS: WebSocket, event: E) {
-        return this._sendEvent(clientWS, event);
+    public sendEvent<E extends Event<any>>(socket: Socket, event: E) {
+        return this._sendEvent(socket, event);
     }
 
-    public call<Req, Resp, M extends Method<Req, Resp>>(clientWS: WebSocket, method: M) {
-        return this._call(clientWS, method);
+    public call<Req, Resp, M extends Method<Req, Resp>>(socket: Socket, method: M) {
+        return this._call(socket, method);
     };
 
     broadcastEvent<E extends Event<any>>(event: E) {
@@ -79,6 +75,6 @@ export default class Server<S = void> extends Side<{ id: number, socket: WebSock
     }
 
     public close() {
-        return this.wss.close();
+        return this.server.close();
     }
 };

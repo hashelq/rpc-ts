@@ -1,6 +1,7 @@
 import WebSocket from 'isomorphic-ws';
 import Side from './side.js';
 import { Method, Event } from './types.js';
+import AbstractSocket from './sockets/abstract.js';
 
 const DEFAULT_TIMEOUT = 60 * 1000;
 
@@ -16,20 +17,19 @@ enum ConnectError {
     Connected
 }
 
-export default class Client extends Side<{ socket: WebSocket }, number> {
-    public endpoint: string;
+export default class Client<Socket extends AbstractSocket = any> extends Side<Socket, { socket: Socket }, number> {
     public state: ClientState = ClientState.NotConnected;
-    public ws: WebSocket | undefined;
+    public socket: Socket | undefined;
 
     constructor({
-        endpoint,
+        socket,
         methodTimeout = DEFAULT_TIMEOUT
     }: {
-        endpoint: string,
+        socket: Socket,
         methodTimeout?: number,
     }) {
         super({ safeMode: false, methodTimeout: methodTimeout });
-        this.endpoint = endpoint;
+        this.socket = socket;
     }
 
     connect(): Promise<void> {
@@ -37,21 +37,12 @@ export default class Client extends Side<{ socket: WebSocket }, number> {
             switch (this.state) {
                 case ClientState.NotConnected:
                     this.state = ClientState.Connecting;
-
-                    const ws = new WebSocket(this.endpoint);
-
-                    ws.onopen = () => {
+                    this.socket.on("open", () => {
                         this.state = ClientState.Connected;
-                        this.ws = ws;
-
                         resolve();
-                    };
-
-                    ws.onclose = reject;
-
-                    ws.onmessage = (a: any) => this.onMessage(a.data, { socket: ws });
-
-                    this.ws = ws;
+                    })
+                    this.socket.on("close", reject);
+                    this.socket.on("message", (data: string) => this.onMessage(data, { socket: this.socket }));
                     break;
 
                 case ClientState.Connected:
@@ -65,20 +56,20 @@ export default class Client extends Side<{ socket: WebSocket }, number> {
         })
     }
 
-    genCallbackIndex(_: WebSocket, q: number): number {
+    genCallbackIndex(_: Socket, q: number): number {
         return q;
     }
 
     public sendEvent<E extends Event<any>>(event: E) {
-        return this._sendEvent(this.ws, event);
+        return this._sendEvent(this.socket, event);
     }
 
     public call<Req, Resp, M extends Method<Req, Resp>>(method: M) {
-        return this._call(this.ws, method);
+        return this._call(this.socket, method);
     };
 
     public close() {
-        return this.ws.close();
+        return this.socket.close();
     }
 }
 
