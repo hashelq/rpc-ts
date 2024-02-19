@@ -69,15 +69,15 @@ export default abstract class Side<
   }
 
   protected async onMessageMethod(request: RequestData, source: CS) {
-    const handler = this.methodHandlers.get(request.name);
+    const handler = this.methodHandlers.get(request.n);
     let payload = undefined;
     let error = undefined;
 
     if (!handler) {
-      error = `Method not implemented: ${request.name}`;
+      error = `Method not implemented: ${request.n}`;
     } else {
       const { fn, rtRequest } = handler;
-      const dataInput = rtRequest.decode(request.payload);
+      const dataInput = rtRequest.decode(request.p);
 
       if (isLeft(dataInput)) error = `Method payload malformed`;
       else {
@@ -93,13 +93,13 @@ export default abstract class Side<
     }
 
     const response: ResponseData = {
-      index: request.index,
-      payload,
-      errorRPC: error,
+      i: request.i,
+      p: payload,
+      e: error,
     };
     const toSend: Message = {
-      type: MessageType.Response,
-      content: response,
+      t: MessageType.Response,
+      c: response,
     };
 
     const jdata = JSON.stringify(toSend);
@@ -111,18 +111,18 @@ export default abstract class Side<
   }
 
   protected onMessageResponse(response: ResponseData, source: CS) {
-    const index = this.genCallbackIndex(source.socket, response.index);
+    const index = this.genCallbackIndex(source.socket, response.i);
     const callback = this.callbacks.get(index);
 
     if (callback === undefined)
-      return this.handleProtocolError(`No callback found: ${response.index}`);
+      return this.handleProtocolError(`No callback found: ${response.i}`);
 
     const { resolve, reject, rtResponse } = callback;
 
-    if (response.errorRPC !== undefined)
-      reject(new RPCError(response.errorRPC));
+    if (response.e !== undefined)
+      reject(new RPCError(response.e));
     else {
-      const decoded = rtResponse.decode(response.payload);
+      const decoded = rtResponse.decode(response.p);
 
       if (isLeft(decoded))
         return this.handleProtocolError("Response body malformed.");
@@ -134,11 +134,11 @@ export default abstract class Side<
   }
 
   protected onMessageEvent(event: EventData, source: CS) {
-    const eventHandler = this.eventHandlers.get(event.name);
+    const eventHandler = this.eventHandlers.get(event.n);
     if (eventHandler) {
       const { fn, rtData } = eventHandler;
 
-      const decoded = rtData.decode(event.data);
+      const decoded = rtData.decode(event.d);
       if (isLeft(decoded))
         return this.handleProtocolError("Event body malformed.");
 
@@ -157,9 +157,9 @@ export default abstract class Side<
     if (isLeft(decodedMsg))
       return this.handleProtocolError("Message body malformed.");
 
-    const content = decodedMsg.right.content;
+    const content = decodedMsg.right.c;
 
-    switch (decodedMsg.right.type) {
+    switch (decodedMsg.right.t) {
       case MessageType.Method:
         const decodedReq = RequestData__RT.decode(content);
         if (isLeft(decodedReq))
@@ -193,8 +193,11 @@ export default abstract class Side<
     event: E,
   ): Promise<void> {
     const toSend: Message = {
-      type: MessageType.Event,
-      content: event,
+      t: MessageType.Event,
+      c: {
+        n: event.name,
+        d: event.data
+      },
     };
     const data = JSON.stringify(toSend);
     if (this.debugLoggerSend) this.debugLoggerSend(data, socket);
@@ -207,14 +210,14 @@ export default abstract class Side<
   ) {
     return new Promise(async (resolve, reject) => {
       const data: RequestData = {
-        index: this.methodIndex++,
-        name: method.name,
-        payload: method.request,
+        i: this.methodIndex++,
+        n: method.name,
+        p: method.request,
       };
-      const index = this.genCallbackIndex(socket, data.index);
+      const index = this.genCallbackIndex(socket, data.i);
       const toSend: Message = {
-        type: MessageType.Method,
-        content: data,
+        t: MessageType.Method,
+        c: data,
       };
 
       // send
