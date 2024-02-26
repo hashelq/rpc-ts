@@ -31,11 +31,11 @@ async function createWSEnvironment(): Promise<{
   const server = createWSServer();
   const client = await createWSClient();
 
-  server.debugLoggerSend = (s) => console.log(`Client > ${s}`);
-  server.debugLoggerReceive = (s) => console.log(`Client < ${s}`);
+  server.debugLoggerSend = (s) => console.log(`Server > ${s}`);
+  server.debugLoggerReceive = (s) => console.log(`Server < ${s}`);
 
-  client.debugLoggerSend = (s) => console.log(`Server > ${s}`);
-  client.debugLoggerReceive = (s) => console.log(`Server < ${s}`);
+  client.debugLoggerSend = (s) => console.log(`Client > ${s}`);
+  client.debugLoggerReceive = (s) => console.log(`Client < ${s}`);
 
   return { server, client };
 }
