@@ -4,6 +4,7 @@ import * as t from "io-ts";
 import WebSocketServerImpl from "./servers/wss.js";
 import { WebSocketServer } from "ws";
 import WebSocketImpl from "./sockets/ws.js";
+import { WebSocket } from "ws";
 
 const PORT_FOR_TESTING = 60123;
 
@@ -18,7 +19,7 @@ function createWSServer(): Server {
 }
 
 async function createWSClient(): Promise<Client> {
-  const socket = new WebSocketImpl("ws://127.0.0.1:" + PORT_FOR_TESTING);
+  const socket = new WebSocketImpl(new WebSocket("ws://127.0.0.1:" + PORT_FOR_TESTING));
   const client = new Client({ socket });
   await client.connect();
   return client;
