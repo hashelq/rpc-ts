@@ -45,11 +45,7 @@ describe("server and client", () => {
   it("Basic ClientToServer and ServerToClient RPC", async () => {
     const { server, client } = await createWSEnvironment();
     try {
-      class Hello extends Method<string, string> {
-        name = "Hello";
-        rtRequest = t.string;
-        rtResponse = t.string;
-      }
+      const Hello = Method.new("Hello", t.string, t.string);
 
       server.onMethod(Hello, async (name) => `Hello, ${name} from the server!`);
       client.onMethod(Hello, async (name) => `Hello, ${name} from a client!`);
