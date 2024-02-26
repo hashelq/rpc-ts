@@ -1,14 +1,13 @@
 import AbstractSocket from "./abstract.js";
 import InnerWS from "isomorphic-ws";
 
-// Constructor takes string because of future plans to implement reconnecting.
 export default class WebSocketImpl extends AbstractSocket {
   public socket: InnerWS;
   public endpoint: string;
 
-  constructor(endpoint: string) {
+  constructor(ws: InnerWS) {
     super();
-    this.socket = new InnerWS(endpoint);
+    this.socket = ws;
   }
 
   on(name: string, callback: (x: any) => void): void {
