@@ -4,7 +4,7 @@ import * as t from "io-ts";
 import WebSocketServerImpl from "./servers/wss.js";
 import { WebSocketServer } from "ws";
 import WebSocketImpl from "./sockets/ws.js";
-import { WebSocket } from "ws";
+import WebSocket from "isomorphic-ws";
 
 const PORT_FOR_TESTING = 60123;
 

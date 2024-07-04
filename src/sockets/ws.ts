@@ -13,20 +13,20 @@ export default class WebSocketImpl extends AbstractSocket {
   on(name: string, callback: (x: any) => void): void {
     switch (name) {
       case "open": {
-        this.socket.on("open", callback);
+        this.socket.addEventListener("open", callback);
         break;
       }
       case "message": {
         const cb2 = callback as (data: string) => void;
-        this.socket.on("message", (r) => cb2(r.toString()));
+        this.socket.addEventListener("message", (r) => cb2(r.data.toString()));
         break;
       }
       case "close": {
-        this.socket.on("close", callback);
+        this.socket.addEventListener("close", callback);
         break;
       }
       case "error": {
-        this.socket.on("error", (err) => callback(err));
+        this.socket.addEventListener("error", (err) => callback(err));
         break;
       }
     }
