@@ -223,7 +223,7 @@ export default abstract class Side<
       // send
       const jdata = JSON.stringify(toSend);
       try {
-        await socket.send(jdata);
+        socket.send(jdata);
       } catch (e: any) {
         reject(e);
       }

@@ -32,10 +32,8 @@ export default class WebSocketImpl extends AbstractSocket {
     }
   }
 
-  send(data: string): Promise<void> {
-    return new Promise((res, rej) => {
-      this.socket.send(data, (x) => (x ? rej(x) : res()));
-    });
+  send(data: string): void {
+    this.socket.send(data);
   }
 
   close(): void {}
